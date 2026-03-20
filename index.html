@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NEEHAR YADAV | PORTFOLIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;font-family:'Share Tech Mono',monospace;overflow-x:hidden;cursor:crosshair;user-select:none;}
+#hero{position:relative;height:100vh;min-height:580px;}
+#gc{width:100%;height:100%;display:block;}
+#hud{position:absolute;inset:0;pointer-events:none;}
+#hud .tl{position:absolute;top:20px;left:24px;font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:2px;}
+#hud .tr{position:absolute;top:20px;right:24px;font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:2px;}
+#hud .bl{position:absolute;bottom:20px;left:24px;font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;}
+#hud .br{position:absolute;bottom:20px;right:24px;font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;}
+#hud .title{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
+#hud .title h1{font-size:clamp(11px,2vw,14px);color:rgba(255,255,255,0.9);letter-spacing:6px;text-transform:uppercase;line-height:2.2;}
+#hud .title .sub{font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:4px;margin-top:10px;}
+#enter{position:absolute;bottom:72px;left:50%;transform:translateX(-50%);background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.5);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;padding:12px 28px;cursor:pointer;transition:all 0.2s;pointer-events:all;}
+#enter:hover{border-color:rgba(255,100,200,0.6);color:rgba(255,100,200,0.9);}
+#holdbar{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);width:220px;height:2px;background:rgba(255,255,255,0.05);display:none;}
+#holdbar-fill{height:100%;width:0%;background:#ff64c8;transition:width 0.05s;}
+#ticker{width:100%;overflow:hidden;background:#000;border-top:1px solid rgba(255,255,255,0.07);border-bottom:1px solid rgba(255,255,255,0.07);padding:11px 0;}
+#ticker-inner{display:flex;gap:48px;white-space:nowrap;}
+.tick-item{font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:3px;text-transform:uppercase;}
+.tick-item.hl{color:rgba(255,100,200,0.5);}
+#body{background:#000;padding:56px 40px 80px;}
+.row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.sec{font-size:9px;letter-spacing:4px;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:rgba(255,255,255,0.05);margin-bottom:1px;}
+@media(max-width:700px){.grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.grid{grid-template-columns:1fr;}}
+.card{background:#000;padding:24px 20px;cursor:pointer;transition:background 0.2s;position:relative;}
+.card:hover{background:#0a0a0a;}
+.card .idx{font-size:9px;color:rgba(255,255,255,0.15);letter-spacing:3px;margin-bottom:14px;}
+.card h3{font-size:12px;color:rgba(255,255,255,0.8);margin-bottom:8px;letter-spacing:1px;}
+.card p{font-size:11px;color:rgba(255,255,255,0.2);line-height:1.9;}
+.card .bar{height:1px;margin-top:16px;opacity:0.4;}
+.sk{display:flex;gap:1px;flex-wrap:wrap;margin:1px 0 56px;background:rgba(255,255,255,0.05);}
+.sk span{font-size:10px;padding:11px 15px;color:rgba(255,255,255,0.25);letter-spacing:2px;background:#000;cursor:default;transition:color 0.2s;}
+.sk span:hover{color:rgba(255,100,200,0.8);}
+.cta-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;padding:36px 0;border-top:1px solid rgba(255,255,255,0.05);}
+.cta-row h2{font-size:12px;color:rgba(255,255,255,0.6);letter-spacing:3px;text-transform:uppercase;line-height:2.2;}
+.cta-row p{font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:2px;margin-top:6px;}
+.btn{font-family:'Share Tech Mono',monospace;font-size:10px;padding:13px 26px;background:transparent;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all 0.2s;}
+.btn:hover{border-color:rgba(255,100,200,0.5);color:rgba(255,100,200,0.8);}
+footer{border-top:1px solid rgba(255,255,255,0.05);padding:20px 40px;display:flex;justify-content:space-between;}
+footer span{font-size:9px;color:rgba(255,255,255,0.12);letter-spacing:2px;}
+</style>
+</head>
+<body>
+
+<div id="hero">
+  <canvas id="gc"></canvas>
+  <div id="hud">
+    <div class="tl">©NEEHAR_YADAV | LAB</div>
+    <div class="tr">PORTFOLIO_v1.0</div>
+    <div class="bl" id="timer">00:00:000</div>
+    <div class="br" id="speed-label">HOLD FOR SPEED | 1.00x</div>
+    <div class="title">
+      <h1>NEEHAR YADAV<br>[:: ENGINEER + RESEARCHER ::]</h1>
+      <div class="sub">DEEP LEARNING · EMBEDDED · FULL STACK</div>
+    </div>
+    <button id="enter">[:: CLICK TO ENTER + ENABLE AUDIO ::]</button>
+    <div id="holdbar"><div id="holdbar-fill"></div></div>
+  </div>
+</div>
+
+<div id="ticker">
+  <div id="ticker-inner">
+    <span class="tick-item hl">RANDOM VIDEO CHAT</span><span class="tick-item">·</span>
+    <span class="tick-item">EEG GAME CONTROLLER</span><span class="tick-item">·</span>
+    <span class="tick-item hl">CARBON-AWARE K8S</span><span class="tick-item">·</span>
+    <span class="tick-item">HALLUCINATION DETECTOR</span><span class="tick-item">·</span>
+    <span class="tick-item hl">MRI RECONSTRUCTION</span><span class="tick-item">·</span>
+    <span class="tick-item">POWER GRID ISLANDING</span><span class="tick-item">·</span>
+    <span class="tick-item hl">RANDOM VIDEO CHAT</span><span class="tick-item">·</span>
+    <span class="tick-item">EEG GAME CONTROLLER</span><span class="tick-item">·</span>
+    <span class="tick-item hl">CARBON-AWARE K8S</span><span class="tick-item">·</span>
+    <span class="tick-item">HALLUCINATION DETECTOR</span><span class="tick-item">·</span>
+    <span class="tick-item hl">MRI RECONSTRUCTION</span><span class="tick-item">·</span>
+    <span class="tick-item">POWER GRID ISLANDING</span><span class="tick-item">·</span>
+  </div>
+</div>
+
+<div id="body">
+  <div class="row" style="margin-bottom:14px"><span class="sec">// selected_work</span><span class="sec">2024—2026</span></div>
+  <div class="grid">
+    <div class="card"><div class="idx">01 / MOBILE</div><h3>RANDOM VIDEO CHAT</h3><p>P2P video · WebRTC · Socket.io<br>Railway · React Native</p><div class="bar" style="background:linear-gradient(to right,#ff64c8,transparent)"></div></div>
+    <div class="card"><div class="idx">02 / BCI</div><h3>EEG GAME CONTROLLER</h3><p>Stacking ensemble · LightGBM<br>XGBoost · RandomForest</p><div class="bar" style="background:linear-gradient(to right,#64c8ff,transparent)"></div></div>
+    <div class="card"><div class="idx">03 / RESEARCH</div><h3>CARBON-AWARE K8S</h3><p>CVXPY · ARIMA · Kubernetes<br>Multi-objective autoscaling</p><div class="bar" style="background:linear-gradient(to right,#c864ff,transparent)"></div></div>
+    <div class="card"><div class="idx">04 / VISION</div><h3>HALLUCINATION DETECT</h3><p>ViT + DeBERTa · 97% F1<br>25 architectures · WikiDO</p><div class="bar" style="background:linear-gradient(to right,#64ffb4,transparent)"></div></div>
+    <div class="card"><div class="idx">05 / MEDICAL</div><h3>MRI RECONSTRUCTION</h3><p>U-Net · BraTS 2021<br>Corrupted scan restoration</p><div class="bar" style="background:linear-gradient(to right,#ffb464,transparent)"></div></div>
+    <div class="card"><div class="idx">06 / POWER</div><h3>POWER GRID ISLANDING</h3><p>Prim's algorithm · ICAISS<br>Distribution system optim.</p><div class="bar" style="background:linear-gradient(to right,#ff6464,transparent)"></div></div>
+  </div>
+
+  <div class="row" style="margin:44px 0 14px"><span class="sec">// skill_stack</span></div>
+  <div class="sk">
+    <span>PYTHON</span><span>REACT NATIVE</span><span>TENSORFLOW</span><span>PYTORCH</span><span>NODE.JS</span><span>WEBRTC</span><span>KUBERNETES</span><span>MONGODB</span><span>STM32</span><span>SIGNAL PROC</span><span>COMPUTER VISION</span><span>NLP</span><span>THREE.JS</span><span>DOCKER</span><span>CVXPY</span><span>SOCKET.IO</span>
+  </div>
+
+  <div class="cta-row">
+    <div>
+      <h2>[:: OPEN TO OPPORTUNITIES ::]</h2>
+      <p>GRADUATING JULY 2026 · BANGALORE / COIMBATORE</p>
+    </div>
+    <a href="mailto:neehar@example.com"><button class="btn">[:: GET IN TOUCH ::]</button></a>
+  </div>
+</div>
+
+<footer>
+  <span>©2026 NEEHAR YADAV</span>
+  <span>EEE + AI/ML · AMRITA BANGALORE</span>
+</footer>
+
+<script>
+const canvas = document.getElementById('gc');
+const W = window.innerWidth, H = window.innerHeight;
+canvas.width = W; canvas.height = H;
+const ctx = canvas.getContext('2d');
+
+const CELL = 9;
+const SYMBOLS = ['+','□','○','·','×','▪'];
+const PCOLORS = ['#ff64c8','#c864ff','#64c8ff','#aaaaaa','#ffffff','#ff64c8'];
+const DITHER = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+function dither(x,y,v){ return v > DITHER[y%4][x%4]/16 ? 1 : 0; }
+
+let t=0, mx=W/2, my=H/2;
+let glitching=false, glitchTimer=0, glitchLines=[];
+let speedMult=1, holdProgress=0, isHolding=false;
+let audioStarted=false;
+let ac, masterGain, stepIdx=0, stepTimeout=null;
+let beatFlash=0;
+
+const streaks=[];
+for(let i=0;i<80;i++) streaks.push(newStreak());
+function newStreak(){
+  return {x:Math.random()*W,y:Math.random()*H,angle:Math.random()*Math.PI*2,speed:0.5+Math.random()*2,len:8+Math.random()*45,hue:Math.random()*360,size:1+Math.random()*2,life:Math.random()*100,maxLife:60+Math.random()*80};
+}
+function resetStreak(s){
+  s.x=Math.random()*W; s.y=Math.random()*H;
+  s.angle=Math.random()*Math.PI*2; s.hue=Math.random()*360;
+  s.life=0; s.maxLife=60+Math.random()*80;
+  s.speed=1+Math.random()*3; s.len=10+Math.random()*50;
+}
+
+window.addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; });
+
+function initAudio(){
+  ac = new AudioContext();
+  masterGain = ac.createGain();
+  masterGain.gain.value = 0.7;
+  masterGain.connect(ac.destination);
+  scheduleTick();
+}
+
+function playKick(time){
+  const o=ac.createOscillator(), g=ac.createGain();
+  o.connect(g); g.connect(masterGain);
+  o.frequency.setValueAtTime(180,time);
+  o.frequency.exponentialRampToValueAtTime(30,time+0.12);
+  g.gain.setValueAtTime(1.2,time);
+  g.gain.exponentialRampToValueAtTime(0.001,time+0.18);
+  o.start(time); o.stop(time+0.2);
+}
+function playSnare(time){
+  const buf=ac.createBuffer(1,ac.sampleRate*0.12,ac.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.5);
+  const s=ac.createBufferSource(), g=ac.createGain();
+  const f=ac.createBiquadFilter(); f.type='highpass'; f.frequency.value=1500;
+  s.buffer=buf; s.connect(f); f.connect(g); g.connect(masterGain);
+  g.gain.setValueAtTime(0.6,time); g.gain.exponentialRampToValueAtTime(0.001,time+0.1);
+  s.start(time); s.stop(time+0.13);
+}
+function playHihat(time,open=false){
+  const buf=ac.createBuffer(1,ac.sampleRate*(open?0.2:0.04),ac.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);
+  const s=ac.createBufferSource(), g=ac.createGain();
+  const f=ac.createBiquadFilter(); f.type='highpass'; f.frequency.value=8000;
+  s.buffer=buf; s.connect(f); f.connect(g); g.connect(masterGain);
+  g.gain.setValueAtTime(open?0.25:0.15,time); g.gain.exponentialRampToValueAtTime(0.001,time+(open?0.18:0.03));
+  s.start(time); s.stop(time+(open?0.22:0.05));
+}
+function playBass(time,note=0){
+  const notes=[55,55,65,49,58,73,65,55];
+  const o=ac.createOscillator(), g=ac.createGain();
+  const f=ac.createBiquadFilter(); f.type='lowpass'; f.frequency.value=300;
+  o.type='sawtooth'; o.connect(f); f.connect(g); g.connect(masterGain);
+  o.frequency.value=notes[note%notes.length];
+  g.gain.setValueAtTime(0.5,time); g.gain.exponentialRampToValueAtTime(0.001,time+0.18);
+  o.start(time); o.stop(time+0.2);
+}
+function playArp(time,step){
+  if(speedMult<2) return;
+  const freqs=[440,550,660,880,660,550,440,330];
+  const o=ac.createOscillator(), g=ac.createGain();
+  o.type='square'; o.connect(g); g.connect(masterGain);
+  o.frequency.value=freqs[step%freqs.length];
+  g.gain.setValueAtTime(0.08,time); g.gain.exponentialRampToValueAtTime(0.001,time+0.06);
+  o.start(time); o.stop(time+0.07);
+}
+
+const kickPat  = [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0];
+const bassPat  = [1,0,1,0,0,0,1,0,1,0,0,1,0,0,1,0];
+
+function scheduleTick(){
+  if(!ac) return;
+  const now = ac.currentTime;
+  const step = stepIdx % 16;
+  const ms = 120 / speedMult;
+  if(kickPat[step]) playKick(now);
+  if(step===4||step===12) playSnare(now);
+  if(bassPat[step]) playBass(now, Math.floor(stepIdx/16));
+  playHihat(now, step%8===4);
+  playArp(now, step);
+  beatFlash = 8;
+  if(step===0||step===8) triggerGlitch();
+  stepIdx++;
+  stepTimeout = setTimeout(scheduleTick, ms);
+}
+
+function triggerGlitch(){
+  glitching=true; glitchTimer=10+Math.floor(Math.random()*8);
+  glitchLines=[];
+  for(let i=0;i<4+Math.random()*6;i++){
+    glitchLines.push({y:Math.random()*H,h:1+Math.random()*8,offX:(Math.random()-0.5)*25*speedMult,color:`hsl(${Math.random()*360},100%,70%)`});
+  }
+}
+setInterval(()=>{ if(!audioStarted) triggerGlitch(); }, 3000);
+
+document.getElementById('enter').addEventListener('click',()=>{
+  document.getElementById('enter').style.display='none';
+  document.getElementById('holdbar').style.display='block';
+  if(!audioStarted){ audioStarted=true; initAudio(); }
+});
+
+document.addEventListener('mousedown',()=>{ if(audioStarted) isHolding=true; });
+document.addEventListener('mouseup',()=>{ isHolding=false; });
+document.addEventListener('touchstart',()=>{ if(audioStarted) isHolding=true; },{passive:true});
+document.addEventListener('touchend',()=>{ isHolding=false; });
+
+function updateTicker(speed){
+  const inner=document.getElementById('ticker-inner');
+  if(inner){ inner.style.animationDuration=Math.max(1.5,18/speed)+'s'; }
+}
+
+let startTime=Date.now();
+function updateTimer(){
+  const el=document.getElementById('timer'); if(!el) return;
+  const d=Date.now()-startTime;
+  const ms=d%1000,s=Math.floor(d/1000)%60,m=Math.floor(d/60000)%60;
+  el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(ms).padStart(3,'0')}`;
+}
+
+function drawFigure(offX,offY,alpha){
+  ctx.save(); ctx.globalAlpha=alpha;
+  const cx=W/2+offX, cy=H/2+offY-20;
+  const figW=24, figH=46;
+  const startX=Math.floor(cx/CELL)-figW/2;
+  const startY=Math.floor(cy/CELL)-figH/2;
+  for(let row=0;row<figH;row++){
+    for(let col=0;col<figW;col++){
+      const nx=(col-figW/2)/(figW/2);
+      const wave=Math.sin(t*0.04*speedMult+row*0.15)*0.08;
+      let inside=false;
+      if(row<6&&Math.abs(nx+wave)<0.38) inside=true;
+      if(row>=6&&row<10&&Math.abs(nx+wave)<0.28) inside=true;
+      if(row>=10&&row<22&&Math.abs(nx+wave)<(0.5-Math.abs((row-figH/2)/(figH/2))*0.2)) inside=true;
+      if(row>=10&&row<20&&Math.abs(nx+wave+0.42)<0.22) inside=true;
+      if(row>=10&&row<20&&Math.abs(nx+wave-0.42)<0.22) inside=true;
+      if(row>=22&&row<38&&Math.abs(nx+wave)<0.26) inside=true;
+      if(row>=38&&row<figH&&Math.abs(nx+wave+0.15)<0.14) inside=true;
+      if(row>=38&&row<figH&&Math.abs(nx+wave-0.15)<0.14) inside=true;
+      if(!inside) continue;
+      const v=0.3+0.7*Math.sin(t*0.05*speedMult+row*0.2+col*0.1);
+      if(!dither(col,row,v)) continue;
+      const si=Math.floor((row/figH)*SYMBOLS.length);
+      ctx.fillStyle=PCOLORS[Math.min(si,PCOLORS.length-1)];
+      ctx.font=`${CELL-1}px 'Share Tech Mono',monospace`;
+      ctx.fillText(SYMBOLS[Math.min(si,SYMBOLS.length-1)],(startX+col)*CELL,(startY+row)*CELL+CELL-2);
+    }
+  }
+  ctx.restore();
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+
+  if(isHolding){ holdProgress=Math.min(holdProgress+0.015,1); }
+  else { holdProgress=Math.max(holdProgress-0.02,0); }
+  speedMult=1+holdProgress*14;
+
+  const fillEl=document.getElementById('holdbar-fill');
+  if(fillEl) fillEl.style.width=(holdProgress*100)+'%';
+  const spEl=document.getElementById('speed-label');
+  if(spEl) spEl.textContent=`HOLD FOR SPEED | ${speedMult.toFixed(2)}x`;
+  updateTicker(speedMult);
+
+  if(beatFlash>0) beatFlash--;
+
+  streaks.forEach(s=>{
+    s.life++;
+    s.x+=Math.cos(s.angle)*s.speed*Math.min(speedMult*0.35,4);
+    s.y+=Math.sin(s.angle)*s.speed*Math.min(speedMult*0.35,4);
+    if(s.life>s.maxLife||s.x<-60||s.x>W+60||s.y<-60||s.y>H+60) resetStreak(s);
+    const a=Math.sin(s.life/s.maxLife*Math.PI)*0.85;
+    ctx.save(); ctx.globalAlpha=a;
+    ctx.strokeStyle=`hsl(${s.hue+t*speedMult*0.5},100%,70%)`;
+    ctx.lineWidth=s.size*(0.5+speedMult*0.08);
+    ctx.beginPath();
+    ctx.moveTo(s.x,s.y);
+    ctx.lineTo(s.x-Math.cos(s.angle)*s.len*Math.min(speedMult*0.4,3),s.y-Math.sin(s.angle)*s.len*Math.min(speedMult*0.4,3));
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  const driftX=(mx-W/2)*0.04, driftY=(my-H/2)*0.02;
+  const aberr=2+speedMult*0.5;
+
+  ctx.globalCompositeOperation='screen';
+  [[-aberr,0,'hue-rotate(0deg) saturate(4)'],[0,0,'hue-rotate(120deg) saturate(3)'],[aberr,0,'hue-rotate(240deg) saturate(4)']].forEach(([ox,oy,filt])=>{
+    ctx.save(); ctx.filter=filt;
+    drawFigure(driftX+ox,driftY+oy,0.7);
+    ctx.restore();
+  });
+  ctx.globalCompositeOperation='source-over';
+  drawFigure(driftX,driftY,1);
+
+  if(beatFlash>0){
+    ctx.save(); ctx.globalAlpha=beatFlash/8*0.12;
+    ctx.fillStyle='#ff64c8'; ctx.fillRect(0,0,W,H);
+    ctx.restore();
+  }
+
+  if(glitching){
+    glitchTimer--;
+    if(glitchTimer<=0) glitching=false;
+    glitchLines.forEach(gl=>{
+      try{ const id=ctx.getImageData(0,Math.floor(gl.y),W,Math.max(1,Math.floor(gl.h))); ctx.putImageData(id,gl.offX,gl.y); }catch(e){}
+      ctx.save(); ctx.globalAlpha=0.12+speedMult*0.02;
+      ctx.fillStyle=gl.color; ctx.fillRect(0,gl.y,W,gl.h);
+      ctx.restore();
+    });
+    if(glitchTimer>5&&speedMult>3){
+      ctx.save(); ctx.globalAlpha=0.6;
+      ctx.fillStyle='#000'; ctx.fillRect(0,H/2-13,W,24);
+      ctx.fillStyle='#fff'; ctx.font='11px Share Tech Mono,monospace';
+      ctx.fillText('BUILDING · RESEARCHING · SHIPPING · '.repeat(5),-((t*3*speedMult)%600),H/2+5);
+      ctx.restore();
+    }
+  }
+
+  ctx.save(); ctx.globalAlpha=0.035;
+  for(let y=0;y<H;y+=2){ ctx.fillStyle='#000'; ctx.fillRect(0,y,W,1); }
+  ctx.restore();
+
+  t+=speedMult;
+  updateTimer();
+  requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+</body>
+</html>
