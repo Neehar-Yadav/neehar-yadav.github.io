@@ -36,20 +36,36 @@ h1 span{color:var(--cyan)}
 .proj-num{font-size:9px;letter-spacing:3px;color:rgba(0,212,255,0.3);margin-bottom:3px}
 .proj-title{font-size:12px;color:rgba(255,255,255,0.45);font-weight:400;letter-spacing:0.5px;transition:color .3s}
 .proj-tech{font-size:9px;color:rgba(0,212,255,0.22);letter-spacing:0.5px;margin-top:2px}
-#loading{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .8s}
-#loading.hidden{opacity:0;pointer-events:none}
-.load-title{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--text);letter-spacing:6px}
-.load-sub{font-size:10px;letter-spacing:5px;color:var(--cyan);text-transform:uppercase;opacity:0.6}
-.load-bar{width:180px;height:1px;background:rgba(0,212,255,0.1);overflow:hidden;margin-top:8px}
-.load-fill{height:100%;background:var(--cyan);width:0%;transition:width .3s}
+/* Photo upload overlay */
+#photo-overlay{position:fixed;inset:0;background:rgba(5,10,15,0.92);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+#photo-overlay.hidden{display:none}
+.overlay-title{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--text);letter-spacing:4px}
+.overlay-sub{font-size:11px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;opacity:0.7}
+.upload-zone{width:260px;height:260px;border:1px dashed rgba(0,212,255,0.3);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;transition:border-color .3s;background:rgba(0,212,255,0.03)}
+.upload-zone:hover{border-color:var(--cyan)}
+.upload-zone svg{opacity:0.4}
+.upload-label{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+.upload-btn{font-size:10px;letter-spacing:3px;color:var(--bg);background:var(--cyan);border:none;padding:10px 28px;cursor:pointer;text-transform:uppercase;font-family:'DM Sans',sans-serif;margin-top:4px}
+.skip-btn{font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.2);background:none;border:none;cursor:pointer;text-transform:uppercase;font-family:'DM Sans',sans-serif;margin-top:4px}
 </style>
 </head>
 <body>
 
-<div id="loading">
-  <div class="load-title">NEEHAR</div>
-  <div class="load-sub">Loading Model</div>
-  <div class="load-bar"><div class="load-fill" id="load-fill"></div></div>
+<!-- PHOTO UPLOAD OVERLAY — remove this entire block once you have your photo -->
+<div id="photo-overlay">
+  <div class="overlay-title">ADD YOUR PHOTO</div>
+  <div class="overlay-sub">Replace the 3D model with your real face</div>
+  <div class="upload-zone" id="drop-zone">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="1.5">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+    <div class="upload-label">Drop your photo here</div>
+    <div class="upload-label" style="opacity:0.4;font-size:8px">or click to browse</div>
+    <input type="file" id="file-input" accept="image/*" style="display:none">
+  </div>
+  <button class="upload-btn" onclick="document.getElementById('file-input').click()">Choose Photo</button>
+  <button class="skip-btn" onclick="loadDemo()">Skip — use placeholder</button>
 </div>
 
 <div id="cursor-dot"></div>
@@ -98,162 +114,262 @@ h1 span{color:var(--cyan)}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+// ─── Three.js setup ───────────────────────────────────────────────
 const canvas = document.getElementById('three-canvas')
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true})
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.outputEncoding = THREE.sRGBEncoding
 renderer.toneMapping = THREE.ACESFilmicToneMapping
-renderer.toneMappingExposure = 1.3
-renderer.shadowMap.enabled = true
+renderer.toneMappingExposure = 1.4
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(42, window.innerWidth/window.innerHeight, 0.1, 100)
-camera.position.set(0, 0.05, 2.6)
+camera.position.set(0, 0, 3)
 
-// Lighting — dramatic portrait style
+// ─── Lighting — dramatic portrait ─────────────────────────────────
 const keyLight = new THREE.DirectionalLight(0xfff5e0, 4)
-keyLight.position.set(2.5, 4, 2)
-keyLight.castShadow = true
+keyLight.position.set(2.5, 4, 3)
 scene.add(keyLight)
 
-const rimLight = new THREE.DirectionalLight(0x00d4ff, 1.5)
+const rimLight = new THREE.DirectionalLight(0x00d4ff, 1.8)
 rimLight.position.set(-4, 1, -2)
 scene.add(rimLight)
 
-const fillLight = new THREE.DirectionalLight(0x102030, 1)
-fillLight.position.set(-1, 0, 3)
-scene.add(fillLight)
+scene.add(new THREE.AmbientLight(0x050a10, 2))
 
-scene.add(new THREE.AmbientLight(0x050a10, 1.5))
-
-const dynamicLight = new THREE.PointLight(0xffeedd, 1.2, 12)
-dynamicLight.position.set(0, 0, 2)
+// Dynamic cursor light
+const dynamicLight = new THREE.PointLight(0xffeedd, 1.4, 14)
+dynamicLight.position.set(0, 0, 2.5)
 scene.add(dynamicLight)
 
-let model = null
+// ─── Billboard mesh ───────────────────────────────────────────────
+// Plane sized to fill frame like a portrait photo (width x height)
+const PLANE_W = 1.6
+const PLANE_H = 2.1
+const geo = new THREE.PlaneGeometry(PLANE_W, PLANE_H)
+
+// Normal map — gives the flat photo fake depth that reacts to light
+// We generate a simple bump normal map in a canvas
+function makeNormalMap() {
+  const size = 512
+  const c = document.createElement('canvas')
+  c.width = c.height = size
+  const ctx = c.getContext('2d')
+  // Base normal (flat = pointing toward camera = rgb 128,128,255)
+  ctx.fillStyle = 'rgb(128,128,255)'
+  ctx.fillRect(0,0,size,size)
+  // Soft central bump to give face volume
+  const g = ctx.createRadialGradient(size/2, size*0.42, 10, size/2, size*0.42, size*0.38)
+  g.addColorStop(0,  'rgba(148,138,255,0.7)')  // raised center
+  g.addColorStop(0.6,'rgba(128,128,255,0.2)')
+  g.addColorStop(1,  'rgba(108,118,255,0.0)')
+  ctx.fillStyle = g
+  ctx.fillRect(0,0,size,size)
+  return new THREE.CanvasTexture(c)
+}
+
+const normalMap = makeNormalMap()
+
+// Material — MeshStandardMaterial picks up all the lights you have
+const mat = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+  normalMap,
+  normalScale: new THREE.Vector2(1.2, 1.2),
+  roughness: 0.55,
+  metalness: 0.0,
+  transparent: true,
+})
+
+const mesh = new THREE.Mesh(geo, mat)
+// Shift right of center so text on left doesn't overlap
+mesh.position.set(0.55, 0, 0)
+scene.add(mesh)
+
+// ─── Load photo texture ───────────────────────────────────────────
+let photoLoaded = false
+
+function applyPhoto(src) {
+  const loader = new THREE.TextureLoader()
+  loader.load(src, (tex) => {
+    tex.encoding = THREE.sRGBEncoding
+    // Crop texture to fit portrait aspect using repeat/offset
+    const imgAspect = tex.image.width / tex.image.height
+    const planeAspect = PLANE_W / PLANE_H
+    if (imgAspect > planeAspect) {
+      // image wider than plane — crop sides
+      const s = planeAspect / imgAspect
+      tex.repeat.set(s, 1)
+      tex.offset.set((1 - s) / 2, 0)
+    } else {
+      // image taller — crop top/bottom
+      const s = imgAspect / planeAspect
+      tex.repeat.set(1, s)
+      tex.offset.set(0, (1 - s) / 2)
+    }
+    mat.map = tex
+    mat.needsUpdate = true
+    photoLoaded = true
+    document.getElementById('photo-overlay').classList.add('hidden')
+  })
+}
+
+// Placeholder when no photo — subtle gradient so scene isn't empty
+function loadDemo() {
+  const c = document.createElement('canvas')
+  c.width = 512; c.height = 680
+  const ctx = c.getContext('2d')
+  const g = ctx.createLinearGradient(0,0,0,680)
+  g.addColorStop(0,'#1a2a3a')
+  g.addColorStop(1,'#050a0f')
+  ctx.fillStyle = g
+  ctx.fillRect(0,0,512,680)
+  // Draw silhouette hint
+  ctx.fillStyle = 'rgba(0,212,255,0.06)'
+  ctx.beginPath()
+  ctx.ellipse(256,240,120,150,0,0,Math.PI*2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.ellipse(256,500,170,200,0,Math.PI,Math.PI*2)
+  ctx.fill()
+  // Text prompt
+  ctx.fillStyle = 'rgba(0,212,255,0.25)'
+  ctx.font = '500 14px DM Sans, sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText('Add your photo', 256, 340)
+  mat.map = new THREE.CanvasTexture(c)
+  mat.needsUpdate = true
+  document.getElementById('photo-overlay').classList.add('hidden')
+}
+
+// ─── File input & drag-drop ───────────────────────────────────────
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0]
+  if (!file) return
+  applyPhoto(URL.createObjectURL(file))
+})
+
+const dropZone = document.getElementById('drop-zone')
+dropZone.addEventListener('click', () => document.getElementById('file-input').click())
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor='var(--cyan)' })
+dropZone.addEventListener('dragleave', () => dropZone.style.borderColor='')
+dropZone.addEventListener('drop', e => {
+  e.preventDefault()
+  const file = e.dataTransfer.files[0]
+  if (file && file.type.startsWith('image/')) applyPhoto(URL.createObjectURL(file))
+})
+
+// ─── Mouse tracking ───────────────────────────────────────────────
+const mouse = {x:0, y:0}
+const cursorDot  = document.getElementById('cursor-dot')
+const cursorRing = document.getElementById('cursor-ring')
+let ringX = window.innerWidth/2, ringY = window.innerHeight/2
 let targetRotY = 0, targetRotX = 0
 let currentRotY = 0, currentRotX = 0
 
-// Load GLTFLoader then model
-const gltfScript = document.createElement('script')
-gltfScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js'
-document.head.appendChild(gltfScript)
-gltfScript.onload = () => {
-  const loader = new THREE.GLTFLoader()
-  loader.load('model.glb',
-    (gltf) => {
-      model = gltf.scene
-      const box = new THREE.Box3().setFromObject(model)
-      const center = box.getCenter(new THREE.Vector3())
-      const size = box.getSize(new THREE.Vector3())
-      const maxDim = Math.max(size.x, size.y, size.z)
-      const scale = 1.9 / maxDim
-      model.scale.setScalar(scale)
-      model.position.sub(center.multiplyScalar(scale))
-      model.position.y -= 0.25
-      model.traverse(c => {
-        if (c.isMesh) {
-          c.castShadow = true
-          if (c.material) c.material.envMapIntensity = 0.4
-        }
-      })
-      scene.add(model)
-      document.getElementById('load-fill').style.width = '100%'
-      setTimeout(() => {
-        const l = document.getElementById('loading')
-        l.classList.add('hidden')
-        setTimeout(() => l.remove(), 800)
-      }, 300)
-    },
-    p => { if(p.total) document.getElementById('load-fill').style.width = Math.min(p.loaded/p.total*100,95)+'%' },
-    e => { console.error(e); document.getElementById('loading').classList.add('hidden') }
-  )
-}
-
-// Mouse
-const mouse = {x:0, y:0}
-const cursorDot = document.getElementById('cursor-dot')
-const cursorRing = document.getElementById('cursor-ring')
-let ringX = window.innerWidth/2, ringY = window.innerHeight/2
-
 document.addEventListener('mousemove', e => {
-  mouse.x = (e.clientX/window.innerWidth)*2-1
-  mouse.y = -(e.clientY/window.innerHeight)*2+1
-  cursorDot.style.left = e.clientX+'px'
-  cursorDot.style.top = e.clientY+'px'
+  mouse.x = (e.clientX / window.innerWidth)  * 2 - 1
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1
+  cursorDot.style.left = e.clientX + 'px'
+  cursorDot.style.top  = e.clientY + 'px'
   ringX = e.clientX; ringY = e.clientY
-  targetRotY = mouse.x * 0.38
-  targetRotX = mouse.y * 0.2
+
+  // Subtle tilt — billboard shouldn't rotate too much or it looks weird
+  targetRotY = mouse.x * 0.18
+  targetRotX = mouse.y * 0.10
 })
 
-// Trail
-const tc = document.getElementById('trail-canvas')
+// ─── Cursor trail ─────────────────────────────────────────────────
+const tc  = document.getElementById('trail-canvas')
 const ctx = tc.getContext('2d')
-tc.width = window.innerWidth; tc.height = window.innerHeight
+tc.width  = window.innerWidth
+tc.height = window.innerHeight
 const pts = []
 let lx = -999, ly = -999
+
 document.addEventListener('mousemove', e => {
-  const dx=e.clientX-lx, dy=e.clientY-ly
-  if(Math.sqrt(dx*dx+dy*dy)>4){
-    pts.push({x:e.clientX,y:e.clientY,life:1})
-    if(pts.length>80) pts.shift()
-    lx=e.clientX; ly=e.clientY
+  const dx = e.clientX - lx, dy = e.clientY - ly
+  if (Math.sqrt(dx*dx + dy*dy) > 4) {
+    pts.push({x:e.clientX, y:e.clientY, life:1})
+    if (pts.length > 80) pts.shift()
+    lx = e.clientX; ly = e.clientY
   }
 })
 
-function drawTrail(){
-  ctx.clearRect(0,0,tc.width,tc.height)
-  for(let i=pts.length-1;i>=0;i--){ pts[i].life-=0.018; if(pts[i].life<=0) pts.splice(i,1) }
-  if(pts.length<2) return
-  const draw=(w,a1,a2)=>{
-    ctx.beginPath()
-    ctx.moveTo(pts[0].x,pts[0].y)
-    for(let i=1;i<pts.length-1;i++){
-      const xc=(pts[i].x+pts[i+1].x)/2, yc=(pts[i].y+pts[i+1].y)/2
-      ctx.quadraticCurveTo(pts[i].x,pts[i].y,xc,yc)
-    }
-    ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y)
-    const g=ctx.createLinearGradient(pts[0].x,pts[0].y,pts[pts.length-1].x,pts[pts.length-1].y)
-    g.addColorStop(0,`rgba(255,240,180,0)`)
-    g.addColorStop(0.6,`rgba(255,245,200,${a1})`)
-    g.addColorStop(1,`rgba(255,255,255,${a2})`)
-    ctx.strokeStyle=g; ctx.lineWidth=w; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke()
+function drawTrail() {
+  ctx.clearRect(0, 0, tc.width, tc.height)
+  for (let i = pts.length-1; i >= 0; i--) {
+    pts[i].life -= 0.018
+    if (pts[i].life <= 0) pts.splice(i, 1)
   }
-  draw(10,0.04,0.08)
-  draw(2,0.2,0.7)
+  if (pts.length < 2) return
+  const draw = (w, a1, a2) => {
+    ctx.beginPath()
+    ctx.moveTo(pts[0].x, pts[0].y)
+    for (let i = 1; i < pts.length-1; i++) {
+      const xc = (pts[i].x + pts[i+1].x)/2
+      const yc = (pts[i].y + pts[i+1].y)/2
+      ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc)
+    }
+    ctx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y)
+    const g = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[pts.length-1].x, pts[pts.length-1].y)
+    g.addColorStop(0,   `rgba(255,240,180,0)`)
+    g.addColorStop(0.6, `rgba(255,245,200,${a1})`)
+    g.addColorStop(1,   `rgba(255,255,255,${a2})`)
+    ctx.strokeStyle = g; ctx.lineWidth = w
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke()
+  }
+  draw(10, 0.04, 0.08)
+  draw(2,  0.2,  0.7)
 }
 
-// Animation
+// ─── Animate ──────────────────────────────────────────────────────
 let curRingX = ringX, curRingY = ringY
-function animate(){
+
+function animate() {
   requestAnimationFrame(animate)
-  curRingX += (ringX-curRingX)*0.1
-  curRingY += (ringY-curRingY)*0.1
-  cursorRing.style.left=curRingX+'px'
-  cursorRing.style.top=curRingY+'px'
-  if(model){
-    currentRotY += (targetRotY-currentRotY)*0.045
-    currentRotX += (targetRotX-currentRotX)*0.045
-    model.rotation.y = currentRotY
-    model.rotation.x = currentRotX
-  }
-  dynamicLight.position.set(mouse.x*2.5, mouse.y*2, 1.8)
+
+  // Cursor ring smooth follow
+  curRingX += (ringX - curRingX) * 0.1
+  curRingY += (ringY - curRingY) * 0.1
+  cursorRing.style.left = curRingX + 'px'
+  cursorRing.style.top  = curRingY + 'px'
+
+  // Gentle photo tilt following cursor
+  currentRotY += (targetRotY - currentRotY) * 0.045
+  currentRotX += (targetRotX - currentRotX) * 0.045
+  mesh.rotation.y = currentRotY
+  mesh.rotation.x = currentRotX
+
+  // Dynamic light follows cursor — makes face look like it's lit from cursor
+  dynamicLight.position.set(mouse.x * 3, mouse.y * 2, 2.2)
+
   drawTrail()
   renderer.render(scene, camera)
 }
 animate()
 
-window.addEventListener('resize',()=>{
-  camera.aspect=window.innerWidth/window.innerHeight
+// ─── Resize ───────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
-  renderer.setSize(window.innerWidth,window.innerHeight)
-  tc.width=window.innerWidth; tc.height=window.innerHeight
+  renderer.setSize(window.innerWidth, window.innerHeight)
+  tc.width  = window.innerWidth
+  tc.height = window.innerHeight
 })
 
-document.querySelectorAll('a,.proj').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{ cursorRing.style.width='64px'; cursorRing.style.height='64px'; cursorRing.style.borderColor='rgba(0,212,255,0.9)' })
-  el.addEventListener('mouseleave',()=>{ cursorRing.style.width='40px'; cursorRing.style.height='40px'; cursorRing.style.borderColor='rgba(0,212,255,0.5)' })
+// ─── Hover effects ────────────────────────────────────────────────
+document.querySelectorAll('a, .proj').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursorRing.style.width  = '64px'
+    cursorRing.style.height = '64px'
+    cursorRing.style.borderColor = 'rgba(0,212,255,0.9)'
+  })
+  el.addEventListener('mouseleave', () => {
+    cursorRing.style.width  = '40px'
+    cursorRing.style.height = '40px'
+    cursorRing.style.borderColor = 'rgba(0,212,255,0.5)'
+  })
 })
 </script>
 </body>
