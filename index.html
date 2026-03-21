@@ -167,10 +167,13 @@ scene.add(mesh)
 const PHOTO_FILE = 'pf.jpg'
 
 const loader = new THREE.TextureLoader()
+loader.crossOrigin = 'anonymous'
 loader.load(
   PHOTO_FILE,
   (tex) => {
     tex.encoding = THREE.sRGBEncoding
+    tex.wrapS = THREE.ClampToEdgeWrapping
+    tex.wrapT = THREE.ClampToEdgeWrapping
     // Auto-crop to fill portrait frame correctly
     const imgAspect   = tex.image.width / tex.image.height
     const planeAspect = PLANE_W / PLANE_H
